@@ -2,12 +2,14 @@ const categoryModel = require('../models/category')
 const categoryController = {
   sort: async (req, res) => {
     try{
-      const page = Number(req.query.page) || 1
-      const limit = Number(req.query.limit) || 5
+      const query = req.query
+
+      const page = Number(query.page) || 1
+      const limit = Number(query.limit) || 5
       const offset = (page - 1) * limit
-      const sortby = req.query.sortby || 'name'
-      const sort = req.query.sort.toUpperCase() || 'ASC'
-      const search = req.query.search || ''
+      const sortby = query.sortby || 'name'
+      const sort = query.sort.toUpperCase() || 'ASC'
+      const search = query.search || ''
       const result = await categoryModel.sort({limit, offset, sort, sortby, search})
       const {rows: [count]} = await categoryModel.countCategory()
       const totalData = parseInt(count.count)
@@ -43,33 +45,48 @@ const categoryController = {
       .catch(err => res.send(err)
       )
   },
-  insert: (req, res) => {
+  insert: async (req, res) => {
     const { name } = req.body
-    categoryModel.insert(name)
-      .then(
-        result => res.json('Category created')
-      )
-      .catch(err => res.send(err)
-      )
+    try {
+      const result = await categoryModel.insert(name)
+      res.status(200).json({
+        message: 'Category is created',
+        data: result
+      })
+    } catch (err) {
+      res.status(500).json({
+        message: err
+      })
+    }
   },
-  update: (req, res) => {
+  update: async (req, res) => {
     const id = Number(req.params.id)
     const name = req.body.name
-    categoryModel.update(id, name)
-      .then(
-        result => res.json('Category updated')
-      )
-      .catch(err => res.send(err)
-      )
+    try {
+      const result = await categoryModel.update(id, name)
+      res.status(200).json({
+        message: 'Category is updated',
+        data: result
+      })
+    } catch (err) {
+      res.status(500).json({
+        message: err
+      })
+    }
   },
-  delete: (req, res) => {
+  delete: async (req, res) => {
     const id = Number(req.params.id)
-    categoryModel.deleteCategory(id)
-      .then(
-        result => res.json('Category deleted')
-      )
-      .catch(err => res.send(err)
-      )
+    try {
+      const result = await categoryModel.deleteCategory(id)
+      res.status(200).json({
+        message: 'Category is deleted',
+        data: result
+      })
+    } catch (err) {
+      res.status(500).json({
+        message: err
+      })
+    }
   }
 }
 

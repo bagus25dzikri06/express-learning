@@ -8,7 +8,7 @@ const ProductRouter = require('./src/routes/product')
 const CategoryRouter = require('./src/routes/category')
 
 const PORT = process.env.PORT || 5000
-const DB_HOST = process.env.DB_HOSTNAME
+const DB_HOST = process.env.DB_HOST
 
 app.use(express.json())
 app.use(cors())
