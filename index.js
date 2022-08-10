@@ -1,75 +1,32 @@
+require('dotenv').config()
 const express = require('express')
+const createError = require('http-errors')
 const app = express()
-const commonMiddleware = require('./src/middleware/commonjs')
-const products = [
-  {
-    id: 1,
-    name: 'baju',
-    stock: 10,
-    price: 10000
-  },
-  {
-    id: 2,
-    name: 'kemeja',
-    stock: 5,
-    price: 50000
-  },
-]
+const cors = require('cors')
+const morgan = require('morgan')
+const ProductRouter = require('./src/routes/product')
+const CategoryRouter = require('./src/routes/category')
+
+const PORT = process.env.PORT || 5000
+const DB_HOST = process.env.DB_HOSTNAME
 
 app.use(express.json())
-
-app.get('/products', (req, res) => {
-  res.send(products)
+app.use(cors())
+app.use(morgan('dev'))
+app.use('/products', ProductRouter)
+app.use('/category', CategoryRouter)
+app.all('*', (req, res, next) => {
+  next(new createError.NotFound())
 })
+app.use((err,req,res)=>{
+  const messageError = err.message || "internal server error"
+  const statusCode = err.status || 500
 
-app.get('/products/:id', (req, res) => {
-  const id = Number(req.params.id)
-  const product = products.find(product => product.id === id)
-  res.send(product)
-})
-
-app.post('/products', commonMiddleware, (req, res) => {
-  const { name, stock, price } = req.body
-  const productNew = {
-    id: products.length + 1,
-    name,
-    stock,
-    price
-  }
-
-  products.push(productNew)
-  res.json({
-    Message: 'Product is created'
+  res.status(statusCode).json({
+    message : messageError
   })
+
 })
-
-app.put('/products/:id', (req, res) => {
-  const id = Number(req.params.id)
-  const { name, stock, price } = req.body
-  const index = products.findIndex(product => product.id === id)
-  const productUpdate = {
-    id: products[index].id,
-    name,
-    stock,
-    price
-  }
-
-  products[index] = productUpdate
-  res.json({
-    Message: 'Product is updated'
-  })
-})
-
-app.delete('/products/:id', (req, res) => {
-  const id = Number(req.params.id)
-  const index = products.findIndex(product => product.id === id)
-  
-  products.splice(index, 1)
-  res.json({
-    Message: 'Product is deleted'
-  })
-})
-
 app.listen(3000, () => {
-  console.log('Server runs in port 3000')
+  console.log(`server running on http://${DB_HOST}:${PORT}`)
 })
