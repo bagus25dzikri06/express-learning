@@ -1,4 +1,5 @@
 const categoryModel = require('../models/category')
+const createErrors = require('http-errors')
 const categoryController = {
   sort: async (req, res) => {
     try{
@@ -48,14 +49,17 @@ const categoryController = {
   insert: async (req, res) => {
     const { name } = req.body
     try {
-      const result = await categoryModel.insert(name)
-      res.status(200).json({
+      const result = await categoryModel.selectCategory(name)
+      if (result.rowCount > 0) throw new createErrors.BadRequest('This category has been available')
+
+      const data = await categoryModel.insert(name)
+      res.status(201).json({
         message: 'Category is created',
-        data: result
+        categoryData: data.rows[0]
       })
     } catch (err) {
       res.status(500).json({
-        message: err
+        message: err.message
       })
     }
   },

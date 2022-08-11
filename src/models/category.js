@@ -11,8 +11,12 @@ const select = (id) => {
   return Pool.query(`SELECT * FROM category 
   WHERE id=${id}`)
 }
+const selectCategory = (name) => {
+  return Pool.query(`SELECT * FROM category 
+  WHERE name='${name}'`)
+}
 const insert = (name) => {
-  return Pool.query(`INSERT INTO category(name) VALUES ('${name}')`)
+  return Pool.query(`INSERT INTO category(name) VALUES ('${name}') RETURNING *`)
 }
 const update = (id, name) => {
   return Pool.query(`UPDATE category SET name='${name}' 
@@ -30,6 +34,7 @@ module.exports = {
   selectAll,
   sort,
   select,
+  selectCategory,
   insert,
   update,
   deleteCategory,
